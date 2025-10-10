@@ -1,31 +1,33 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useProducts } from "@/lib/products-context"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Pencil, Trash2, Plus, ArrowLeft } from "lucide-react"
-import Link from "next/link"
-import type { Product } from "@/lib/cart-context"
+import { useState } from "react";
+import { useProducts } from "@/lib/products-context";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Pencil, Trash2, Plus, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import type { Product } from "@/lib/cart-context";
 
 export default function AdminPage() {
-  const { products, addProduct, updateProduct, deleteProduct } = useProducts()
-  const [isAdding, setIsAdding] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
+  const { products, addProduct, updateProduct, deleteProduct } = useProducts();
+  const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     category: "",
     price: "",
     image: "",
-  })
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const priceValue = Number.parseFloat(formData.price.replace(/[^\d,]/g, "").replace(",", "."))
+    e.preventDefault();
+    const priceValue = Number.parseFloat(
+      formData.price.replace(/[^\d,]/g, "").replace(",", ".")
+    );
 
     if (editingId) {
       updateProduct(editingId, {
@@ -34,8 +36,8 @@ export default function AdminPage() {
         price: `R$ ${priceValue.toFixed(2).replace(".", ",")}`,
         priceValue,
         image: formData.image || "/placeholder.svg",
-      })
-      setEditingId(null)
+      });
+      setEditingId(null);
     } else {
       addProduct({
         name: formData.name,
@@ -43,12 +45,12 @@ export default function AdminPage() {
         price: `R$ ${priceValue.toFixed(2).replace(".", ",")}`,
         priceValue,
         image: formData.image || "/placeholder.svg",
-      })
+      });
     }
 
-    setFormData({ name: "", category: "", price: "", image: "" })
-    setIsAdding(false)
-  }
+    setFormData({ name: "", category: "", price: "", image: "" });
+    setIsAdding(false);
+  };
 
   const handleEdit = (product: Product) => {
     setFormData({
@@ -56,16 +58,16 @@ export default function AdminPage() {
       category: product.category,
       price: product.priceValue.toString(),
       image: product.image || "",
-    })
-    setEditingId(product.id)
-    setIsAdding(true)
-  }
+    });
+    setEditingId(product.id);
+    setIsAdding(true);
+  };
 
   const handleCancel = () => {
-    setFormData({ name: "", category: "", price: "", image: "" })
-    setEditingId(null)
-    setIsAdding(false)
-  }
+    setFormData({ name: "", category: "", price: "", image: "" });
+    setEditingId(null);
+    setIsAdding(false);
+  };
 
   return (
     <div className="min-h-screen bg-background py-24">
@@ -89,7 +91,9 @@ export default function AdminPage() {
 
         {isAdding && (
           <Card className="p-6 mb-8">
-            <h2 className="text-xl font-serif mb-6">{editingId ? "Editar Produto" : "Novo Produto"}</h2>
+            <h2 className="text-xl font-serif mb-6">
+              {editingId ? "Editar Produto" : "Novo Produto"}
+            </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -97,7 +101,9 @@ export default function AdminPage() {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -106,7 +112,9 @@ export default function AdminPage() {
                   <Input
                     id="category"
                     value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -117,7 +125,9 @@ export default function AdminPage() {
                     type="number"
                     step="0.01"
                     value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -126,13 +136,17 @@ export default function AdminPage() {
                   <Input
                     id="image"
                     value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, image: e.target.value })
+                    }
                     placeholder="/placeholder.svg"
                   />
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button type="submit">{editingId ? "Salvar Alterações" : "Adicionar Produto"}</Button>
+                <Button type="submit">
+                  {editingId ? "Salvar Alterações" : "Adicionar Produto"}
+                </Button>
                 <Button type="button" variant="outline" onClick={handleCancel}>
                   Cancelar
                 </Button>
@@ -152,15 +166,28 @@ export default function AdminPage() {
                 />
               </div>
               <div className="p-4">
-                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">{product.category}</p>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                  {product.category}
+                </p>
                 <h3 className="font-serif mb-2">{product.name}</h3>
-                <p className="text-lg font-light mb-4">{product.price}</p>
+                <p className="text-lg font-light mb-4 text-price">
+                  {product.price}
+                </p>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleEdit(product)} className="flex-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(product)}
+                    className="flex-1"
+                  >
                     <Pencil className="h-4 w-4 mr-2" />
                     Editar
                   </Button>
-                  <Button variant="destructive" size="sm" onClick={() => deleteProduct(product.id)}>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => deleteProduct(product.id)}
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -170,5 +197,5 @@ export default function AdminPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
