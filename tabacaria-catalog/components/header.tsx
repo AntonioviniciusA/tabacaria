@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { CartDrawer } from "./cart-drawer"
 import { ThemeToggle } from "./theme-toggle"
-import Image from "next/image"
 import Link from "next/link"
 
 export function Header() {
@@ -15,9 +14,8 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo */}
           <div className="flex-shrink-0">
-            <Image src="/pnm-headshop-logo.jpeg" alt="PNM Headshop" width={120} height={60} className="h-12 w-auto" />
+            <h1 className="text-2xl lg:text-3xl font-serif italic font-light">Cerrado Smoke Shop</h1>
           </div>
 
           {/* Desktop Navigation */}
