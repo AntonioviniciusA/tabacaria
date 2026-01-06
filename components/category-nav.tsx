@@ -22,7 +22,7 @@ export function CategoryNav() {
             return (
               <Link
                 key={category.id}
-                href={`#produtos`}
+                href={`/categorias/${category.slug}`}
                 className="group flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary"
               >
                 <Icon className="h-4 w-4 transition-colors group-hover:text-primary" />

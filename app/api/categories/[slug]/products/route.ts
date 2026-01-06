@@ -3,21 +3,31 @@ import { turso } from "@/lib/turso";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { slug: string } }
 ) {
   try {
-    const { id } = params;
-    if (!id || typeof id !== "string") {
-      return NextResponse.json(
-        { error: "ID de categoria inválido" },
-        { status: 400 }
-      );
+    const { slug } = params;
+    console.log(slug);
+    if (!slug || typeof slug !== "string") {
+      return NextResponse.json({ error: "Slug inválido" }, { status: 400 });
     }
 
-    console.log("[API] /api/categories/[id]/products GET id:", id);
+    const catRes = await turso.execute({
+      sql: "SELECT id FROM categories WHERE slug = ?",
+      args: [slug.trim()],
+    });
+
+    if (catRes.rows.length === 0) {
+      return NextResponse.json(
+        { error: "Categoria não encontrada" },
+        { status: 404 }
+      );
+    }
+    const categoryId = catRes.rows[0].id as string;
+    console.log(categoryId);
     const result = await turso.execute({
       sql: "SELECT * FROM products WHERE category_id = ? ORDER BY created_at DESC",
-      args: [id.trim()],
+      args: [categoryId],
     });
 
     const baseProducts = result.rows.map((row) => ({
@@ -40,18 +50,10 @@ export async function GET(
       })
     );
 
-    console.log(
-      "[API] /api/categories/[id]/products result count:",
-      products.length
-    );
     return NextResponse.json(products);
   } catch (error: any) {
-    console.error(
-      "[API] /api/categories/[id]/products error:",
-      error?.message || String(error)
-    );
     return NextResponse.json(
-      { error: error?.message || "Erro ao buscar produtos da categoria" },
+      { error: error?.message || "Erro ao buscar produtos por slug" },
       { status: 500 }
     );
   }
