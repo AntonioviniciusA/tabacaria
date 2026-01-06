@@ -20,23 +20,25 @@ export async function GET(
       args: [id.trim()],
     });
 
-    const products = result.rows.map((row) => ({
+    const baseProducts = result.rows.map((row) => ({
       id: row.id as string,
       name: row.name as string,
       description: (row.description as string) ?? null,
       price: Number(row.price),
       image: (row.image as string) ?? null,
-      departmentId: row.department_id as string,
       categoryId: row.category_id as string,
-      installments:
-        row.installments !== null && row.installments !== undefined
-          ? Number(row.installments)
-          : null,
-      installmentPrice:
-        row.installment_price !== null && row.installment_price !== undefined
-          ? Number(row.installment_price)
-          : null,
     }));
+
+    const products = await Promise.all(
+      baseProducts.map(async (p) => {
+        const imagesRes = await turso.execute({
+          sql: "SELECT image_data FROM product_images WHERE product_id = ? ORDER BY created_at DESC",
+          args: [p.id],
+        });
+        const extraImages = imagesRes.rows.map((r) => r.image_data as string);
+        return { ...p, extraImages };
+      })
+    );
 
     console.log(
       "[API] /api/categories/[id]/products result count:",

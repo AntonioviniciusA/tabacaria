@@ -9,12 +9,6 @@ import {
   useCallback,
 } from "react";
 
-export interface Department {
-  id: string;
-  name: string;
-  slug: string;
-}
-
 export interface Category {
   id: string;
   name: string;
@@ -24,13 +18,11 @@ export interface Category {
 export interface Product {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   price: number;
   image: string;
-  departmentId: string;
   categoryId: string;
-  installments?: number;
-  installmentPrice?: number;
+  extraImages?: string[];
 }
 
 export interface CartItem {
@@ -46,26 +38,18 @@ export interface Analytics {
 }
 
 interface StoreContextType {
-  departments: Department[];
   categories: Category[];
   products: Product[];
   cart: CartItem[];
   analytics: Analytics[];
   cookiesAccepted: boolean;
   isLoaded: boolean;
-  addDepartment: (department: Omit<Department, "id">) => Promise<void>;
   addCategory: (category: Omit<Category, "id">) => Promise<void>;
   addProduct: (product: Omit<Product, "id">) => Promise<void>;
-  updateDepartment: (
-    id: string,
-    department: Partial<Department>
-  ) => Promise<void>;
   updateCategory: (id: string, category: Partial<Category>) => Promise<void>;
   updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
-  deleteDepartment: (id: string) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
-  getProductsByDepartment: (departmentId: string) => Product[];
   getProductsByCategory: (categoryId: string) => Product[];
   addCart: (product: Product, quantity: number) => Promise<void>;
   removeCart: (productId: string) => Promise<void>;
@@ -80,7 +64,6 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -91,13 +74,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // Função para carregar todos os dados do banco
   const loadData = useCallback(async () => {
     try {
-      // Carrega departments
-      const deptsRes = await fetch("/api/departments");
-      if (deptsRes.ok) {
-        const depts = await deptsRes.json();
-        setDepartments(depts);
-      }
-
       // Carrega categories
       const catsRes = await fetch("/api/categories");
       if (catsRes.ok) {
@@ -148,66 +124,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const refreshData = useCallback(async () => {
     await loadData();
   }, [loadData]);
-
-  // Departments
-  const addDepartment = useCallback(
-    async (department: Omit<Department, "id">) => {
-      try {
-        const res = await fetch("/api/departments", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(department),
-        });
-        if (res.ok) {
-          const newDept = await res.json();
-          setDepartments((prev) => [...prev, newDept]);
-        }
-      } catch (error) {
-        console.error("Erro ao adicionar departamento:", error);
-      }
-    },
-    []
-  );
-
-  const updateDepartment = useCallback(
-    async (id: string, department: Partial<Department>) => {
-      try {
-        const res = await fetch(`/api/departments/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(department),
-        });
-        if (res.ok) {
-          const updated = await res.json();
-          setDepartments((prev) =>
-            prev.map((d) => (d.id === id ? updated : d))
-          );
-        }
-      } catch (error) {
-        console.error("Erro ao atualizar departamento:", error);
-      }
-    },
-    []
-  );
-
-  const deleteDepartment = useCallback(async (id: string) => {
-    try {
-      const res = await fetch(`/api/departments/${id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Erro ao deletar departamento");
-      }
-      setDepartments((prev) => prev.filter((d) => d.id !== id));
-      // Remove produtos relacionados também
-      setProducts((prev) => prev.filter((p) => p.departmentId !== id));
-      return { success: true };
-    } catch (error) {
-      console.error("Erro ao deletar departamento:", error);
-      throw error;
-    }
-  }, []);
 
   // Categories
   const addCategory = useCallback(async (category: Omit<Category, "id">) => {
@@ -448,13 +364,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const getProductsByDepartment = useCallback(
-    (departmentId: string) => {
-      return products.filter((p) => p.departmentId === departmentId);
-    },
-    [products]
-  );
-
   const getProductsByCategory = useCallback(
     (categoryId: string) => {
       return products.filter((p) => p.categoryId === categoryId);
@@ -465,14 +374,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   return (
     <StoreContext.Provider
       value={{
-        departments,
         categories,
         products,
         cart,
         analytics,
         cookiesAccepted,
         isLoaded,
-        addDepartment,
         addCategory,
         addProduct,
         addCart,
@@ -482,13 +389,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         trackProductClick,
         getAnalytics,
         setCookiesAccepted,
-        updateDepartment,
         updateCategory,
         updateProduct,
-        deleteDepartment,
         deleteCategory,
         deleteProduct,
-        getProductsByDepartment,
         getProductsByCategory,
         refreshData,
       }}

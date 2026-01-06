@@ -48,12 +48,7 @@ export default function AdminLoginPage() {
         <CardContent className="p-8">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <Image
-                src="/Logo.png"
-                alt="Logo"
-                width={100}
-                height={100}
-              />
+              <Image src="/Logo.png" alt="Logo" width={100} height={100} />
             </div>
             <h1 className="text-2xl font-bold text-gray-900">
               Área Administrativa
@@ -111,7 +106,7 @@ export default function AdminLoginPage() {
           </form>
 
           <p className="text-xs text-gray-500 text-center mt-4">
-            Desenvolvido por DominusTech
+            Desenvolvido por Vinicius Alvino
           </p>
         </CardContent>
       </Card>

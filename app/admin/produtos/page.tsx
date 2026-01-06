@@ -21,20 +21,13 @@ import Link from "next/link";
 import { ProductImagesManager } from "../products-images-manager";
 
 export default function ProdutosPage() {
-  const {
-    products,
-    departments,
-    categories,
-    addProduct,
-    updateProduct,
-    deleteProduct,
-  } = useStore();
+  const { products, categories, addProduct, updateProduct, deleteProduct } =
+    useStore();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     price: "",
     image: "",
-    departmentId: "",
     categoryId: "",
     installments: "",
     installmentPrice: "",
@@ -88,12 +81,7 @@ export default function ProdutosPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (
-      !formData.name ||
-      !formData.price ||
-      !formData.departmentId ||
-      !formData.categoryId
-    ) {
+    if (!formData.name || !formData.price || !formData.categoryId) {
       alert("Preencha todos os campos obrigatórios");
       return;
     }
@@ -104,19 +92,22 @@ export default function ProdutosPage() {
       finalImage = "/placeholder.svg?height=300&width=300";
     }
 
+    const toNumber = (s: string) => {
+      const n = Number(
+        (s || "")
+          .replace(/[^\d,.-]/g, "")
+          .replace(".", "")
+          .replace(",", ".")
+      );
+      return Number.isFinite(n) ? n : 0;
+    };
+
     addProduct({
       name: formData.name,
       description: formData.description,
-      price: Number.parseFloat(formData.price),
+      price: toNumber(formData.price),
       image: finalImage,
-      departmentId: formData.departmentId,
       categoryId: formData.categoryId,
-      installments: formData.installments
-        ? Number.parseInt(formData.installments)
-        : undefined,
-      installmentPrice: formData.installmentPrice
-        ? Number.parseFloat(formData.installmentPrice)
-        : undefined,
     });
 
     // Reset form
@@ -125,10 +116,7 @@ export default function ProdutosPage() {
       description: "",
       price: "",
       image: "",
-      departmentId: "",
       categoryId: "",
-      installments: "",
-      installmentPrice: "",
     });
     setImageInputType(null);
   };
@@ -142,12 +130,7 @@ export default function ProdutosPage() {
   };
 
   const saveEdit = () => {
-    if (
-      !editData.name ||
-      !editData.price ||
-      !editData.departmentId ||
-      !editData.categoryId
-    ) {
+    if (!editData.name || !editData.price || !editData.categoryId) {
       alert("Preencha todos os campos obrigatórios");
       return;
     }
@@ -205,7 +188,7 @@ export default function ProdutosPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    placeholder="Ex: REDMI 14C 128 GB 8GB"
+                    placeholder="Ex: Piteira de vidro space"
                     className="text-gray-900 placeholder-gray-500"
                     required
                   />
@@ -233,13 +216,13 @@ export default function ProdutosPage() {
                   </Label>
                   <Input
                     id="price"
-                    type="number"
-                    step="0.01"
+                    type="text"
+                    inputMode="decimal"
                     value={formData.price}
                     onChange={(e) =>
                       setFormData({ ...formData, price: e.target.value })
                     }
-                    placeholder="899.99"
+                    placeholder="899,99"
                     className="text-gray-900 placeholder-gray-500"
                     required
                   />
@@ -356,28 +339,6 @@ export default function ProdutosPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="department" className="text-gray-900">
-                    Departamento *
-                  </Label>
-                  <select
-                    id="department"
-                    value={formData.departmentId}
-                    onChange={(e) =>
-                      setFormData({ ...formData, departmentId: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 bg-white"
-                    required
-                  >
-                    <option value="">Selecione um departamento</option>
-                    {departments.map((dept) => (
-                      <option key={dept.id} value={dept.id}>
-                        {dept.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
                   <Label htmlFor="category" className="text-gray-900">
                     Categoria *
                   </Label>
@@ -397,46 +358,6 @@ export default function ProdutosPage() {
                       </option>
                     ))}
                   </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="installments" className="text-gray-900">
-                      Parcelas
-                    </Label>
-                    <Input
-                      id="installments"
-                      type="number"
-                      value={formData.installments}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          installments: e.target.value,
-                        })
-                      }
-                      placeholder="12"
-                      className="text-gray-900 placeholder-gray-500"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="installmentPrice" className="text-gray-900">
-                      Valor da Parcela
-                    </Label>
-                    <Input
-                      id="installmentPrice"
-                      type="number"
-                      step="0.01"
-                      value={formData.installmentPrice}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          installmentPrice: e.target.value,
-                        })
-                      }
-                      placeholder="75.00"
-                      className="text-gray-900 placeholder-gray-500"
-                    />
-                  </div>
                 </div>
 
                 <Button type="submit" className="w-full">
@@ -483,19 +404,19 @@ export default function ProdutosPage() {
                           </div>
                           <div>
                             <Label className="text-gray-900">Preço (R$)</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={String(editData.price ?? "")}
-                            onChange={(e) =>
-                              setEditData({
-                                ...editData,
-                                price: e.target.value,
-                              })
-                            }
-                            className="text-gray-900"
-                            required
-                          />
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              value={String(editData.price ?? "")}
+                              onChange={(e) =>
+                                setEditData({
+                                  ...editData,
+                                  price: e.target.value,
+                                })
+                              }
+                              className="text-gray-900"
+                              required
+                            />
                           </div>
                           <div>
                             <Label className="text-gray-900">Imagem</Label>
@@ -586,28 +507,6 @@ export default function ProdutosPage() {
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-2">
-                            <div>
-                              <Label className="text-gray-900">
-                                Departamento
-                              </Label>
-                              <select
-                                value={editData.departmentId}
-                                onChange={(e) =>
-                                  setEditData({
-                                    ...editData,
-                                    departmentId: e.target.value,
-                                  })
-                                }
-                                className="w-full border border-gray-300 rounded-md px-2 py-1 text-gray-900 bg-white text-sm"
-                                required
-                              >
-                                {departments.map((dept) => (
-                                  <option key={dept.id} value={dept.id}>
-                                    {dept.name}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
                             <div>
                               <Label className="text-gray-900">Categoria</Label>
                               <select

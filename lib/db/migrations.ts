@@ -7,19 +7,6 @@ import { hashPassword } from "../auth-utils";
  */
 export async function runMigrations() {
   try {
-    await turso.execute(`
-      DROP TABLE admins;
-    `);
-    // Tabela de departamentos
-    await turso.execute(`
-      CREATE TABLE IF NOT EXISTS departments (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        slug TEXT NOT NULL UNIQUE,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
     // Tabela de categorias
     await turso.execute(`
       CREATE TABLE IF NOT EXISTS categories (
@@ -38,12 +25,10 @@ export async function runMigrations() {
         description TEXT,
         price REAL NOT NULL,
         image TEXT,
-        department_id TEXT NOT NULL,
         category_id TEXT NOT NULL,
         installments INTEGER,
         installment_price REAL,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (department_id) REFERENCES departments(id),
         FOREIGN KEY (category_id) REFERENCES categories(id)
       )
     `);
@@ -142,9 +127,8 @@ async function createDefaultAdmin() {
 
     // Credenciais padrão
     const defaultUsername = "admin";
-    const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || "admin123";
-    const defaultEmail =
-      process.env.ADMIN_DEFAULT_EMAIL || "admin@dominustech.com";
+    const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD;
+    const defaultEmail = process.env.ADMIN_DEFAULT_EMAIL;
 
     // Gera hash da senha
     const passwordHash = hashPassword(defaultPassword);

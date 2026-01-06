@@ -5,10 +5,8 @@ export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const categoryId = url.searchParams.get("categoryId");
-    const departmentId = url.searchParams.get("departmentId");
     console.log("[API] /api/products GET params:", {
       categoryId,
-      departmentId,
     });
 
     let sql = "SELECT * FROM products";
@@ -17,9 +15,6 @@ export async function GET(req: Request) {
     if (categoryId) {
       sql += " WHERE category_id = ?";
       args.push(categoryId);
-    } else if (departmentId) {
-      sql += " WHERE department_id = ?";
-      args.push(departmentId);
     }
 
     sql += " ORDER BY created_at DESC";
@@ -29,17 +24,24 @@ export async function GET(req: Request) {
       sql,
       args,
     });
-    const products = result.rows.map((row) => ({
+    const baseProducts = result.rows.map((row) => ({
       id: row.id as string,
       name: row.name as string,
       description: row.description as string | null,
       price: row.price as number,
       image: row.image as string | null,
-      departmentId: row.department_id as string,
       categoryId: row.category_id as string,
-      installments: row.installments as number | null,
-      installmentPrice: row.installment_price as number | null,
     }));
+    const products = await Promise.all(
+      baseProducts.map(async (p) => {
+        const imagesRes = await turso.execute({
+          sql: "SELECT image_data FROM product_images WHERE product_id = ? ORDER BY created_at DESC",
+          args: [p.id],
+        });
+        const extraImages = imagesRes.rows.map((r) => r.image_data as string);
+        return { ...p, extraImages };
+      })
+    );
     console.log("[API] /api/products result count:", products.length);
     return NextResponse.json(products);
   } catch (error: any) {
@@ -53,20 +55,49 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const {
-      name,
-      description,
-      price,
-      image,
-      departmentId,
-      categoryId,
-      installments,
-      installmentPrice,
-    } = await req.json();
+    const { name, description, price, image, categoryId } = await req.json();
 
-    if (!name || price === undefined || !departmentId || !categoryId) {
+    if (!name || price === undefined || !categoryId) {
       return NextResponse.json(
-        { error: "Nome, preço, departamento e categoria são obrigatórios" },
+        { error: "Nome, preço e categoria são obrigatórios" },
+        { status: 400 }
+      );
+    }
+
+    const normalizeMoney = (val: unknown) => {
+      if (val === null) return null;
+      if (typeof val === "number") return val;
+      if (typeof val === "string") {
+        const s = val.trim();
+        if (s === "") return null;
+        const n = Number(
+          s
+            .replace(/[^\d,.-]/g, "")
+            .replace(".", "")
+            .replace(",", ".")
+        );
+        return Number.isFinite(n) ? n : null;
+      }
+      return null;
+    };
+    const priceNorm = normalizeMoney(price);
+    if (priceNorm === null) {
+      return NextResponse.json({ error: "Preço inválido" }, { status: 400 });
+    }
+    const catId = typeof categoryId === "string" ? categoryId.trim() : "";
+    if (!catId) {
+      return NextResponse.json(
+        { error: "Categoria inválida" },
+        { status: 400 }
+      );
+    }
+    const catCheck = await turso.execute({
+      sql: "SELECT id FROM categories WHERE id = ?",
+      args: [catId],
+    });
+    if (catCheck.rows.length === 0) {
+      return NextResponse.json(
+        { error: "Categoria inexistente" },
         { status: 400 }
       );
     }
@@ -76,35 +107,29 @@ export async function POST(req: Request) {
       .substring(2, 15)}`;
 
     await turso.execute({
-      sql: `INSERT INTO products (id, name, description, price, image, department_id, category_id, installments, installment_price)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      args: [
-        id,
-        name,
-        description || null,
-        price,
-        image || null,
-        departmentId,
-        categoryId,
-        installments || null,
-        installmentPrice || null,
-      ],
+      sql: `INSERT INTO products (id, name, description, price, image, category_id)
+            VALUES (?, ?, ?, ?, ?, ?)`,
+      args: [id, name, description || null, priceNorm, image || null, catId],
     });
 
     const product = {
       id,
       name,
       description: description || null,
-      price,
+      price: priceNorm,
       image: image || null,
-      departmentId,
       categoryId,
-      installments: installments || undefined,
-      installmentPrice: installmentPrice || undefined,
     };
 
     return NextResponse.json(product, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error(
+      "[API] /api/products POST error:",
+      error?.message || String(error)
+    );
+    return NextResponse.json(
+      { error: error?.message || "Erro interno ao criar produto" },
+      { status: 500 }
+    );
   }
 }

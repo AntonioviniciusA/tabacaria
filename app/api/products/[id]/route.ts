@@ -17,16 +17,7 @@ export async function PUT(
       );
     }
     console.log(id);
-    const {
-      name,
-      description,
-      price,
-      image,
-      departmentId,
-      categoryId,
-      installments,
-      installmentPrice,
-    } = await req.json();
+    const { name, description, price, image, categoryId } = await req.json();
 
     // Validações básicas com suporte a strings numéricas
     if (
@@ -39,20 +30,6 @@ export async function PUT(
       )
     ) {
       return NextResponse.json({ error: "Preço inválido" }, { status: 400 });
-    }
-    if (
-      installmentPrice !== undefined &&
-      !(
-        typeof installmentPrice === "number" ||
-        (typeof installmentPrice === "string" &&
-          installmentPrice.trim() !== "" &&
-          Number.isFinite(Number(installmentPrice)))
-      )
-    ) {
-      return NextResponse.json(
-        { error: "Valor de parcela inválido" },
-        { status: 400 }
-      );
     }
     if (name !== undefined && typeof name !== "string") {
       return NextResponse.json({ error: "Nome inválido" }, { status: 400 });
@@ -88,35 +65,7 @@ export async function PUT(
           ? null
           : image
         : undefined;
-    const deptNorm =
-      typeof departmentId === "string" ? departmentId : undefined;
     const catNorm = typeof categoryId === "string" ? categoryId : undefined;
-    const instNorm =
-      installments === null
-        ? null
-        : typeof installments === "string"
-        ? installments.trim() === ""
-          ? null
-          : Number.parseInt(installments)
-        : typeof installments === "number"
-        ? installments
-        : undefined;
-    if (typeof instNorm === "number" && Number.isNaN(instNorm)) {
-      (instNorm as unknown as null) = null;
-    }
-    const instPriceNorm =
-      installmentPrice === null
-        ? null
-        : typeof installmentPrice === "string"
-        ? installmentPrice.trim() === ""
-          ? null
-          : Number(installmentPrice)
-        : typeof installmentPrice === "number"
-        ? installmentPrice
-        : undefined;
-    if (typeof instPriceNorm === "number" && Number.isNaN(instPriceNorm)) {
-      (instPriceNorm as unknown as null) = null;
-    }
 
     const updates: string[] = [];
     const args: (string | number | null)[] = [];
@@ -137,22 +86,11 @@ export async function PUT(
       updates.push("image = ?");
       args.push(imageNorm);
     }
-    if (deptNorm !== undefined) {
-      updates.push("department_id = ?");
-      args.push(deptNorm);
-    }
     if (catNorm !== undefined) {
       updates.push("category_id = ?");
       args.push(catNorm);
     }
-    if (instNorm !== undefined) {
-      updates.push("installments = ?");
-      args.push(instNorm as number | null);
-    }
-    if (instPriceNorm !== undefined) {
-      updates.push("installment_price = ?");
-      args.push(instPriceNorm as number | null);
-    }
+    // parcelas removidas
 
     if (updates.length === 0) {
       return NextResponse.json(
@@ -187,10 +125,7 @@ export async function PUT(
       description: row.description as string | null,
       price: row.price as number,
       image: row.image as string | null,
-      departmentId: row.department_id as string,
       categoryId: row.category_id as string,
-      installments: row.installments as number | null,
-      installmentPrice: row.installment_price as number | null,
     };
 
     return NextResponse.json(product);

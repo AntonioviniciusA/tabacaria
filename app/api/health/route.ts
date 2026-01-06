@@ -41,7 +41,7 @@ export async function GET() {
     }
 
     // Verifica se as tabelas existem
-    const tables = ["departments", "categories", "products", "cart", "analytics", "preferences", "admins"]
+    const tables = ["categories", "products", "cart", "analytics", "preferences", "admins"]
     const missingTables: string[] = []
 
     for (const table of tables) {
