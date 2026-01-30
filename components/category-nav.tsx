@@ -24,7 +24,12 @@ export function CategoryNav() {
   return (
     <div className="border-b border-border bg-background/95 backdrop-blur-sm">
       <div className="container mx-auto px-4">
-        <nav className="flex items-center justify-center gap-8 py-4">
+        <nav className="  flex items-center gap-8 py-4
+    w-full
+    overflow-x-auto whitespace-nowrap
+    justify-start md:justify-center
+    px-4
+    scrollbar-hide">
           {categories.map((category) => {
             const Icon = getIconByName(category.name);
             return (
