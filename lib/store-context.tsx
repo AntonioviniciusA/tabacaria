@@ -305,7 +305,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Analytics
- const trackProductClick = useCallback(async (productId: string) => {
+  const trackProductClick = useCallback(async (productId: string) => {
     try {
       await fetch("/api/analytics", {
         method: "PUT",
@@ -313,31 +313,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({
           productId: productId,
         }),
-      });
-      // Atualiza o estado local otimisticamente
-      setAnalytics((prev) => {
-        const existing = prev.find((a) => a.productId === product.id);
-        if (existing) {
-          return prev.map((a) =>
-            a.productId === product.id
-              ? {
-                  ...a,
-                  clicks: a.clicks + 1,
-                  lastClicked: new Date().toISOString(),
-                }
-              : a
-          );
-        } else {
-          return [
-            ...prev,
-            {
-              productId: product.id,
-              productName: product.name,
-              clicks: 1,
-              lastClicked: new Date().toISOString(),
-            },
-          ];
-        }
       });
     } catch (error) {
       console.error("Erro ao rastrear clique:", error);

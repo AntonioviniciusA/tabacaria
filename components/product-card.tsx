@@ -50,6 +50,7 @@ export function ProductCard({ product }: ProductCardProps,
   ];
 
   const handleAddToCart = () => {
+    trackProductClick(product.id);
     addItem({
       id: product.id,
       name: product.name,
@@ -57,7 +58,8 @@ export function ProductCard({ product }: ProductCardProps,
       price: priceLabel,
       image: product.image || "/placeholder.svg",
     });
-    trackProductClick(product.id);
+    console.log("Product added to cart:", product.id);
+    
     
     toast.success(`${product.name} adicionado ao carrinho!`);
   };
