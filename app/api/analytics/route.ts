@@ -16,39 +16,44 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+export async function PUT(req: Request) {
   try {
-    const { productId, productName } = await req.json()
+    console.log(req.json);
+    const { productId } = await req.json();
 
-    if (!productId || !productName) {
-      return NextResponse.json({ error: "ProductId e productName são obrigatórios" }, { status: 400 })
+    if (!productId) {
+      return NextResponse.json(
+        { error: "productId é obrigatório" },
+        { status: 400 }
+      );
     }
 
-    // Verifica se já existe analytics para este produto
-    const existing = await turso.execute({
-      sql: "SELECT id, clicks FROM analytics WHERE product_id = ?",
+    const result = await turso.execute({
+      sql: `
+        UPDATE analytics
+        SET
+          clicks = clicks + 1,
+          last_clicked = CURRENT_TIMESTAMP,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE product_id = ?
+      `,
       args: [productId],
-    })
+    });
 
-    if (existing.rows.length > 0) {
-      // Atualiza o contador
-      const newClicks = (existing.rows[0].clicks as number) + 1
-      await turso.execute({
-        sql: "UPDATE analytics SET clicks = ?, last_clicked = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-        args: [newClicks, existing.rows[0].id],
-      })
-    } else {
-      // Cria nova entrada
-      const id = `analytics_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`
-      await turso.execute({
-        sql: "INSERT INTO analytics (id, product_id, product_name, clicks, last_clicked) VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP)",
-        args: [id, productId, productName],
-      })
+    if (result.rowsAffected === 0) {
+      return NextResponse.json(
+        { error: "Analytics não encontrado para este produto" },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json({ success: true }, { status: 201 })
+    return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
   }
 }
+
 

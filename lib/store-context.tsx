@@ -55,7 +55,7 @@ interface StoreContextType {
   removeCart: (productId: string) => Promise<void>;
   updateCartQuantity: (productId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
-  trackProductClick: (product: Product) => Promise<void>;
+  trackProductClick: (productId: string) => Promise<void>;
   getAnalytics: () => Analytics[];
   setCookiesAccepted: (accepted: boolean) => Promise<void>;
   refreshData: () => Promise<void>;
@@ -305,14 +305,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Analytics
-  const trackProductClick = useCallback(async (product: Product) => {
+ const trackProductClick = useCallback(async (productId: string) => {
     try {
       await fetch("/api/analytics", {
-        method: "POST",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          productId: product.id,
-          productName: product.name,
+          productId: productId,
         }),
       });
       // Atualiza o estado local otimisticamente

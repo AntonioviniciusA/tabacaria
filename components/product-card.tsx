@@ -23,6 +23,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { useStore } from "@/lib/store-context";
 
 interface Product {
   id: string;
@@ -38,7 +39,9 @@ interface ProductCardProps {
   product: Product;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product }: ProductCardProps, 
+) {
+  const { trackProductClick} = useStore();
   const addItem = useCartStore((state) => state.addItem);
   const priceLabel = `R$ ${Number(product.price).toFixed(2).replace(".", ",")}`;
   const images = [
@@ -54,6 +57,8 @@ export function ProductCard({ product }: ProductCardProps) {
       price: priceLabel,
       image: product.image || "/placeholder.svg",
     });
+    trackProductClick(product.id);
+    
     toast.success(`${product.name} adicionado ao carrinho!`);
   };
 

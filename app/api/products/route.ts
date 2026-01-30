@@ -121,6 +121,20 @@ export async function POST(req: Request) {
       categoryId,
     };
 
+    const analyticsId = `analytics_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`; 
+    await turso.execute({
+  sql: `
+    INSERT INTO analytics (
+      id,
+      product_id,
+      product_name,
+      clicks,
+      last_clicked
+    ) VALUES (?, ?, ?, 0, NULL)
+  `,
+  args: [analyticsId, id, name],
+});
+
     return NextResponse.json(product, { status: 201 });
   } catch (error: any) {
     console.error(
