@@ -104,10 +104,17 @@ export function Header() {
             <Link href="#produtos" onClick={closeMobileMenu}>PRODUTOS</Link>
             <Link href="#sobre" onClick={closeMobileMenu}>SOBRE</Link>
             <Link href="#contato" onClick={closeMobileMenu}>CONTATO</Link>
-            <Link href="/carrinho" onClick={closeMobileMenu}>
-              Carrinho {mounted && totalItems > 0 && `(${totalItems})`}
-            </Link>
             <CategoryNav />
+            <Link href="/carrinho">
+              <Button variant="ghost" size="icon" className="relative md:flex">
+                <ShoppingCart className="h-10 w-10" />
+                {mounted && totalItems > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                    {totalItems}
+                  </span>
+                )}
+              </Button>
+            </Link>
           </nav>
         </aside>
       </div>
