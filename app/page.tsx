@@ -8,7 +8,10 @@ export default function HomePage() {
   return (
     <main className="min-h-screen">
       <Header />
-      <CategoryNav />
+  <div className="hidden md:block">
+  <CategoryNav />
+</div>
+
       <Hero />
       <div className="mb-12 mt-12 text-center">
         <h2 className="text-balance text-4xl font-bold tracking-tight md:text-5xl">
