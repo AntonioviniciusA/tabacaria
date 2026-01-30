@@ -1,13 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { Flame, Scroll, TestTube, Package } from "lucide-react";
+import {
+  Flame,
+  Scroll,
+  TestTube,
+  Package,
+  PanelLeftDashed,
+} from "lucide-react";
 import { useStore } from "@/lib/store-context";
 
 function getIconByName(name: string) {
   if (name === "Sedas") return Scroll;
   if (name === "Isqueiros") return Flame;
-  if (name === "Piteiras") return TestTube;
+  if (name === "Piteiras de Vidro") return TestTube;
+  if (name === "Piteira") return PanelLeftDashed;
+
   return Package;
 }
 

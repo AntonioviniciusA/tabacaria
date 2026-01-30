@@ -144,8 +144,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const updateCategory = useCallback(
     async (id: string, category: Partial<Category>) => {
+     console.info("Updating category with ID (from context):", id);
       try {
-        const res = await fetch(`/api/categories/${id}`, {
+        const res = await fetch(`/api/categories/id/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(category),
@@ -163,7 +164,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const deleteCategory = useCallback(async (id: string) => {
     try {
-      const res = await fetch(`/api/categories/${id}`, {
+      const res = await fetch(`/api/categories/id/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {

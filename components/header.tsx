@@ -6,22 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Menu, ShoppingCart } from "lucide-react";
 import { useCartStore } from "@/lib/cart-store";
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose,
-} from "@/components/ui/sheet";
 
 export function Header() {
   const items = useCartStore((state) => state.items);
   const [mounted, setMounted] = useState(false);
-  const pathname = usePathname();
-  const toHref = (hash: string) =>
-    pathname === "/" ? `#${hash}` : `/#${hash}`;
 
   useEffect(() => {
     setMounted(true);
@@ -45,19 +33,19 @@ export function Header() {
 
         <nav className="hidden items-center gap-8 md:flex">
           <Link
-            href={toHref("produtos")}
+            href="#produtos"
             className="text-sm font-medium transition-colors hover:text-primary"
           >
             PRODUTOS
           </Link>
           <Link
-            href={toHref("sobre")}
+            href="#sobre"
             className="text-sm font-medium transition-colors hover:text-primary"
           >
             SOBRE
           </Link>
           <Link
-            href={toHref("contato")}
+            href="#contato"
             className="text-sm font-medium transition-colors hover:text-primary"
           >
             CONTATO
@@ -79,53 +67,9 @@ export function Header() {
               )}
             </Button>
           </Link>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-80">
-              <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
-              </SheetHeader>
-              <div className="flex flex-col gap-4 p-4">
-                <SheetClose asChild>
-                  <Link
-                    href={toHref("produtos")}
-                    className="text-sm font-medium transition-colors hover:text-primary"
-                  >
-                    Produtos
-                  </Link>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Link
-                    href={toHref("sobre")}
-                    className="text-sm font-medium transition-colors hover:text-primary"
-                  >
-                    Sobre
-                  </Link>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Link
-                    href={toHref("contato")}
-                    className="text-sm font-medium transition-colors hover:text-primary"
-                  >
-                    Contato
-                  </Link>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Link
-                    href="/carrinho"
-                    className="text-sm font-medium transition-colors hover:text-primary"
-                  >
-                    Carrinho{" "}
-                    {mounted && totalItems > 0 ? `(${totalItems})` : ""}
-                  </Link>
-                </SheetClose>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <Button variant="ghost" size="icon" className="md:hidden">
+            <Menu className="h-6 w-6" />
+          </Button>
         </div>
       </div>
     </header>
