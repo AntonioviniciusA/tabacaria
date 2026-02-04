@@ -15,7 +15,7 @@ function getIconByName(name: string) {
   if (name === "Sedas") return Scroll;
   if (name === "Isqueiros") return Flame;
   if (name === "Piteiras de Vidro") return TestTube;
-  if (name === "Piteira") return PanelLeftDashed;
+  if (name === "Piteiras") return PanelLeftDashed;
 
   return Package;
 }

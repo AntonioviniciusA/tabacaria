@@ -34,7 +34,7 @@ export function Hero() {
           <div className="relative flex-1">
             <div className="relative mx-auto aspect-square w-full max-w-md">
               <Image
-                src="/logo.png"
+                src="/logo ursinho acenando.png"
                 alt="PNM Headshop"
                 width={500}
                 height={500}

@@ -3,10 +3,10 @@ import { turso } from "@/lib/turso"
 
 export async function GET(
   req: Request,
-  { params }: { params: { slug: string } }
+  { params }:  { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params
+    const { slug } = await params
     if (!slug || typeof slug !== "string") {
       return NextResponse.json({ error: "Slug inválido" }, { status: 400 })
     }
