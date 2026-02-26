@@ -1,8 +1,21 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { Instagram, Facebook, Mail, Phone, MapPin } from "lucide-react";
+import { Instagram, Phone, PanelLeftDashed , Scroll, Flame, TestTube, Package} from "lucide-react";
+import { useStore } from "@/lib/store-context";
+
 
 export function Footer() {
+  function getIconByName(name: string) {
+  if (name === "Sedas") return Scroll;
+  if (name === "Isqueiros") return Flame;
+  if (name === "Piteiras de Vidro") return TestTube;
+  if (name === "Piteiras") return PanelLeftDashed;
+
+  return Package;
+}
+  const {categories} = useStore();
   return (
     <footer className="border-t border-border bg-muted/30 py-12">
       <div className="container mx-auto px-4">
@@ -22,22 +35,16 @@ export function Footer() {
             </p>
             <div className="flex gap-4">
               <Link
-                href="#"
+                href="https://www.instagram.com/pnmheadshop/"
                 className="text-muted-foreground transition-colors hover:text-primary"
               >
                 <Instagram className="h-5 w-5" />
-              </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground transition-colors hover:text-primary"
-              >
-                <Facebook className="h-5 w-5" />
               </Link>
             </div>
           </div>
 
           {/* Links */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-wider">
               Links Rápidos
             </h3>
@@ -75,47 +82,26 @@ export function Footer() {
                 </Link>
               </li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Categories */}
           <div className="space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-wider">
               Categorias
             </h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link
-                  href="#"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  Sedas
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  Isqueiros
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  Acessórios
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  Piteiras
-                </Link>
-              </li>
-            </ul>
+            {categories.map((category) => {
+            const Icon = getIconByName(category.name);
+            return (
+              <Link
+                key={category.id}
+                href={`/categorias/${category.slug}`}
+                className="group flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary"
+              >
+                <Icon className="h-4 w-4 transition-colors group-hover:text-primary" />
+                <span>{category.name}</span>
+              </Link>
+            );
+          })}
           </div>
 
           {/* Contact */}

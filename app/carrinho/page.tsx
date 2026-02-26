@@ -14,9 +14,7 @@ export default function CarrinhoPage() {
   const [mounted, setMounted] = useState(false);
   const { items, updateQuantity, removeItem, clearCart, getTotal } =
     useCartStore();
-  const WHATSAPP_NUMBER = (
-    process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5511999999999"
-  ).replace(/\D/g, "");
+  const WHATSAPP_NUMBER = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER).replace(/\D/g, "");
 
   useEffect(() => {
     setMounted(true);

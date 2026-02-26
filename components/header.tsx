@@ -39,13 +39,13 @@ export function Header() {
 
           {/* Desktop menu */}
           <nav className="hidden items-center gap-8 md:flex">
-            <Link href="#produtos" className="text-sm font-medium hover:text-primary">
+            <Link href="/#produtos" className="text-sm font-medium hover:text-primary">
               PRODUTOS
             </Link>
-            <Link href="#sobre" className="text-sm font-medium hover:text-primary">
+            <Link href="/#sobre" className="text-sm font-medium hover:text-primary">
               SOBRE
             </Link>
-            <Link href="#contato" className="text-sm font-medium hover:text-primary">
+            <Link href="/#contato" className="text-sm font-medium hover:text-primary">
               CONTATO
             </Link>
           </nav>
