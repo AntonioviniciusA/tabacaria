@@ -16,7 +16,7 @@ export function ProductGrid({ categoryId }: { categoryId?: string }) {
   const getCategoryName = (categoryId: string) =>
     categories.find((c) => c.id === categoryId)?.name ?? "Categoria";
   const [page, setPage] = useState(1);
-  const limit = 10;
+  const limit = 8;
 
   const totalPages = Math.ceil(totalProducts / limit);
 
@@ -28,11 +28,18 @@ export function ProductGrid({ categoryId }: { categoryId?: string }) {
     setPage(1);
   }, [categoryId]);
 
+
+  if (productsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner />
+      </div>
+    );
+  }
   return (
     <section className="py-20">
       <div className="container mx-auto px-4">
-        {productsLoading && <LoadingSpinner size={100} />}
-
+       
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((p) => (
             <ProductCard
@@ -53,7 +60,7 @@ export function ProductGrid({ categoryId }: { categoryId?: string }) {
         {totalPages > 1 && (
           <div className="flex justify-center gap-2 mt-10">
             <button
-              disabled={page === 1}
+              disabled={page === 1 || productsLoading}
               onClick={() => setPage((prev) => prev - 1)}
               className="px-4 py-2 border rounded"
             >
@@ -63,6 +70,7 @@ export function ProductGrid({ categoryId }: { categoryId?: string }) {
             {Array.from({ length: totalPages }).map((_, i) => (
               <button
                 key={i}
+                disabled={productsLoading}
                 onClick={() => setPage(i + 1)}
                 className={`px-4 py-2 border rounded ${
                   page === i + 1 ? "bg-black text-white" : ""
@@ -73,7 +81,7 @@ export function ProductGrid({ categoryId }: { categoryId?: string }) {
             ))}
 
             <button
-              disabled={page === totalPages}
+              disabled={page === totalPages || productsLoading}
               onClick={() => setPage((prev) => prev + 1)}
               className="px-4 py-2 border rounded"
             >
