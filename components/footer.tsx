@@ -15,7 +15,7 @@ export function Footer() {
 
   return Package;
 }
-  const {categories} = useStore();
+  const { fiveCategories } = useStore();
   return (
     <footer className="border-t border-border bg-muted/30 py-12">
       <div className="container mx-auto px-4">
@@ -89,7 +89,7 @@ export function Footer() {
             <h3 className="text-sm font-bold uppercase tracking-wider">
               Categorias
             </h3>
-            {categories.map((category) => {
+            {fiveCategories.map((category) => {
             const Icon = getIconByName(category.name);
             return (
               <Link

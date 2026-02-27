@@ -39,6 +39,7 @@ export interface Analytics {
 
 interface StoreContextType {
   categories: Category[];
+  fiveCategories: Category[];
   products: Product[];
   cart: CartItem[];
   analytics: Analytics[];
@@ -57,6 +58,7 @@ interface StoreContextType {
   clearCart: () => Promise<void>;
   trackProductClick: (productId: string) => Promise<void>;
   getAnalytics: () => Analytics[];
+  GetFiveCategories: () => Category[];
   setCookiesAccepted: (accepted: boolean) => Promise<void>;
   refreshData: () => Promise<void>;
 }
@@ -70,6 +72,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [analytics, setAnalytics] = useState<Analytics[]>([]);
   const [cookiesAccepted, setCookiesAcceptedState] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+
 
   // Função para carregar todos os dados do banco
   const loadData = useCallback(async () => {
@@ -345,11 +348,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     [products]
   );
+const GetFiveCategories = useCallback(() => {
+  return categories.slice(0, 5);
+}, [categories]);
+
+const fiveCategories = GetFiveCategories();
+
+  
 
   return (
     <StoreContext.Provider
       value={{
         categories,
+        fiveCategories,
         products,
         cart,
         analytics,
