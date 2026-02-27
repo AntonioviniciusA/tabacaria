@@ -2,19 +2,26 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Instagram, Phone, PanelLeftDashed , Scroll, Flame, TestTube, Package} from "lucide-react";
+import {
+  Instagram,
+  Phone,
+  PanelLeftDashed,
+  Scroll,
+  Flame,
+  TestTube,
+  Package,
+} from "lucide-react";
 import { useStore } from "@/lib/store-context";
-
 
 export function Footer() {
   function getIconByName(name: string) {
-  if (name === "Sedas") return Scroll;
-  if (name === "Isqueiros") return Flame;
-  if (name === "Piteiras de Vidro") return TestTube;
-  if (name === "Piteiras") return PanelLeftDashed;
+    if (name === "Sedas") return Scroll;
+    if (name === "Isqueiros") return Flame;
+    if (name === "Piteiras de Vidro") return TestTube;
+    if (name === "Piteiras") return PanelLeftDashed;
 
-  return Package;
-}
+    return Package;
+  }
   const { fiveCategories } = useStore();
   return (
     <footer className="border-t border-border bg-muted/30 py-12">
@@ -36,9 +43,14 @@ export function Footer() {
             <div className="flex gap-4">
               <Link
                 href="https://www.instagram.com/pnmheadshop/"
-                className="text-muted-foreground transition-colors hover:text-primary"
+                target="_blank"
+                className="flex items-center gap-2 text-muted-foreground transition-all duration-300 hover:scale-105"
               >
-                <Instagram className="h-5 w-5" />
+                <Instagram className="h-5 w-5 text-purple-500 transition-colors duration-300 group-hover:text-green-400" />
+
+                <span className="bg-gradient-to-r from-purple-500 via-violet-500 to-green-400 bg-clip-text text-transparent font-semibold">
+                  @pnmheadshop
+                </span>
               </Link>
             </div>
           </div>
@@ -90,18 +102,18 @@ export function Footer() {
               Categorias
             </h3>
             {fiveCategories.map((category) => {
-            const Icon = getIconByName(category.name);
-            return (
-              <Link
-                key={category.id}
-                href={`/categorias/${category.slug}`}
-                className="group flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary"
-              >
-                <Icon className="h-4 w-4 transition-colors group-hover:text-primary" />
-                <span>{category.name}</span>
-              </Link>
-            );
-          })}
+              const Icon = getIconByName(category.name);
+              return (
+                <Link
+                  key={category.id}
+                  href={`/categorias/${category.slug}`}
+                  className="group flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary"
+                >
+                  <Icon className="h-4 w-4 transition-colors group-hover:text-primary" />
+                  <span>{category.name}</span>
+                </Link>
+              );
+            })}
           </div>
 
           {/* Contact */}

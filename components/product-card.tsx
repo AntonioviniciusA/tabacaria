@@ -39,9 +39,8 @@ interface ProductCardProps {
   product: Product;
 }
 
-export function ProductCard({ product }: ProductCardProps, 
-) {
-  const { trackProductClick} = useStore();
+export function ProductCard({ product }: ProductCardProps) {
+  const { trackProductClick } = useStore();
   const addItem = useCartStore((state) => state.addItem);
   const priceLabel = `R$ ${Number(product.price).toFixed(2).replace(".", ",")}`;
   const images = [
@@ -59,8 +58,7 @@ export function ProductCard({ product }: ProductCardProps,
       image: product.image || "/placeholder.svg",
     });
     console.log("Product added to cart:", product.id);
-    
-    
+
     toast.success(`${product.name} adicionado ao carrinho!`);
   };
 

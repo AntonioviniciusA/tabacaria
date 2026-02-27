@@ -1,42 +1,86 @@
 "use client";
+import { useEffect, useState } from "react";
 import { ProductCard } from "@/components/product-card";
 import { useStore } from "@/lib/store-context";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
-interface ProductGridProps {
-  categoryId?: string;
-  title?: string;
-  subtitle?: string;
-}
+export function ProductGrid({ categoryId }: { categoryId?: string }) {
+  const {
+    products,
+    totalProducts,
+    productsLoading,
+    fetchProductsPaginated,
+    categories,
+  } = useStore();
 
-export function ProductGrid({ categoryId, title, subtitle }: ProductGridProps) {
-  const { products, categories } = useStore();
   const getCategoryName = (categoryId: string) =>
     categories.find((c) => c.id === categoryId)?.name ?? "Categoria";
-  const filtered = categoryId
-    ? products.filter((p) => p.categoryId === categoryId)
-    : products;
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
+  const totalPages = Math.ceil(totalProducts / limit);
+
+  useEffect(() => {
+    fetchProductsPaginated(page, limit, categoryId);
+  }, [page, categoryId]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [categoryId]);
 
   return (
-    <section id="produtos" className="py-20">
+    <section className="py-20">
       <div className="container mx-auto px-4">
-        
+        {productsLoading && <LoadingSpinner size={100} />}
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((p) => (
+          {products.map((p) => (
             <ProductCard
               key={p.id}
               product={{
                 id: p.id,
                 name: p.name,
-                category: getCategoryName(p.categoryId),
                 price: p.price,
-                image: p.image || null,
-                extraImages: p.extraImages || [],
-                description: p.description || null,
+                image: p.image ?? null,
+                extraImages: p.extraImages,
+                description: p.description,
+                category: getCategoryName(p.categoryId),
               }}
             />
           ))}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex justify-center gap-2 mt-10">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage((prev) => prev - 1)}
+              className="px-4 py-2 border rounded"
+            >
+              Anterior
+            </button>
+
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i + 1)}
+                className={`px-4 py-2 border rounded ${
+                  page === i + 1 ? "bg-black text-white" : ""
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage((prev) => prev + 1)}
+              className="px-4 py-2 border rounded"
+            >
+              Próximo
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

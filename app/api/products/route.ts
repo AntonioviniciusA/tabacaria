@@ -4,26 +4,47 @@ import { turso } from "@/lib/turso";
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
+
     const categoryId = url.searchParams.get("categoryId");
+    const page = Number(url.searchParams.get("page") || 1);
+    const limit = Number(url.searchParams.get("limit") || 10);
+
+    const offset = (page - 1) * limit;
+
     console.log("[API] /api/products GET params:", {
       categoryId,
+      page,
+      limit,
+      offset,
     });
 
-    let sql = "SELECT * FROM products";
+    let whereClause = "";
     const args: any[] = [];
 
     if (categoryId) {
-      sql += " WHERE category_id = ?";
+      whereClause = "WHERE category_id = ?";
       args.push(categoryId);
     }
 
-    sql += " ORDER BY created_at DESC";
-    console.log("[API] /api/products SQL:", sql, "args:", args);
-
-    const result = await turso.execute({
-      sql,
+    // 🔥 1️⃣ Buscar total
+    const countResult = await turso.execute({
+      sql: `SELECT COUNT(*) as total FROM products ${whereClause}`,
       args,
     });
+
+    const total = Number(countResult.rows[0].total);
+
+    // 🔥 2️⃣ Buscar produtos paginados
+    const result = await turso.execute({
+      sql: `
+        SELECT * FROM products
+        ${whereClause}
+        ORDER BY created_at DESC
+        LIMIT ? OFFSET ?
+      `,
+      args: [...args, limit, offset],
+    });
+
     const baseProducts = result.rows.map((row) => ({
       id: row.id as string,
       name: row.name as string,
@@ -32,27 +53,47 @@ export async function GET(req: Request) {
       image: row.image as string | null,
       categoryId: row.category_id as string,
     }));
+
+    // 🔥 3️⃣ Buscar imagens extras
     const products = await Promise.all(
       baseProducts.map(async (p) => {
         const imagesRes = await turso.execute({
-          sql: "SELECT image_data FROM product_images WHERE product_id = ? ORDER BY created_at DESC",
+          sql: `
+            SELECT image_data 
+            FROM product_images 
+            WHERE product_id = ?
+            ORDER BY created_at DESC
+          `,
           args: [p.id],
         });
-        const extraImages = imagesRes.rows.map((r) => r.image_data as string);
+
+        const extraImages = imagesRes.rows.map(
+          (r) => r.image_data as string
+        );
+
         return { ...p, extraImages };
       })
     );
-    console.log("[API] /api/products result count:", products.length);
-    return NextResponse.json(products);
+
+    return NextResponse.json({
+      data: products,
+      total,
+      page,
+      limit,
+    });
+
   } catch (error: any) {
     console.error(
       "[API] /api/products error:",
       error?.message || String(error)
     );
-    return NextResponse.json({ error: error.message }, { status: 500 });
+
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
   }
 }
-
 export async function POST(req: Request) {
   try {
     const { name, description, price, image, categoryId } = await req.json();

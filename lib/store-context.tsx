@@ -45,6 +45,13 @@ interface StoreContextType {
   analytics: Analytics[];
   cookiesAccepted: boolean;
   isLoaded: boolean;
+  totalProducts: number;
+  productsLoading: boolean;
+  fetchProductsPaginated: (
+    page: number,
+    limit: number,
+    categoryId?: string,
+  ) => Promise<void>;
   addCategory: (category: Omit<Category, "id">) => Promise<void>;
   addProduct: (product: Omit<Product, "id">) => Promise<void>;
   updateCategory: (id: string, category: Partial<Category>) => Promise<void>;
@@ -72,7 +79,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [analytics, setAnalytics] = useState<Analytics[]>([]);
   const [cookiesAccepted, setCookiesAcceptedState] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [productsLoading, setProductsLoading] = useState(false);
 
   // Função para carregar todos os dados do banco
   const loadData = useCallback(async () => {
@@ -83,14 +91,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const cats = await catsRes.json();
         setCategories(cats);
       }
-
-      // Carrega products
-      const prodsRes = await fetch("/api/products");
-      if (prodsRes.ok) {
-        const prods = await prodsRes.json();
-        setProducts(prods);
-      }
-
       // Carrega cart
       const cartRes = await fetch("/api/cart");
       if (cartRes.ok) {
@@ -147,7 +147,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const updateCategory = useCallback(
     async (id: string, category: Partial<Category>) => {
-     console.info("Updating category with ID (from context):", id);
+      console.info("Updating category with ID (from context):", id);
       try {
         const res = await fetch(`/api/categories/id/${id}`, {
           method: "PUT",
@@ -162,7 +162,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         console.error("Erro ao atualizar categoria:", error);
       }
     },
-    []
+    [],
   );
 
   const deleteCategory = useCallback(async (id: string) => {
@@ -183,6 +183,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       throw error;
     }
   }, []);
+  const fetchProductsPaginated = useCallback(
+    async (page: number, limit: number, categoryId?: string) => {
+      try {
+        setProductsLoading(true);
+
+        const params = new URLSearchParams({
+          page: String(page),
+          limit: String(limit),
+        });
+
+        if (categoryId) {
+          params.append("categoryId", categoryId);
+        }
+
+        const res = await fetch(`/api/products?${params.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          setProducts(data.data);
+          setTotalProducts(data.total);
+        }
+
+        setProductsLoading(false);
+      } catch (error) {
+        console.error("Erro ao buscar produtos paginados:", error);
+        setProductsLoading(false);
+      }
+    },
+    [],
+  );
 
   // Products
   const addProduct = useCallback(async (product: Omit<Product, "id">) => {
@@ -217,7 +246,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         console.error("Erro ao atualizar produto:", error);
       }
     },
-    []
+    [],
   );
 
   const deleteProduct = useCallback(async (id: string) => {
@@ -291,7 +320,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         console.error("Erro ao atualizar quantidade do carrinho:", error);
       }
     },
-    [removeCart]
+    [removeCart],
   );
 
   const clearCart = useCallback(async () => {
@@ -346,15 +375,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     (categoryId: string) => {
       return products.filter((p) => p.categoryId === categoryId);
     },
-    [products]
+    [products],
   );
-const GetFiveCategories = useCallback(() => {
-  return categories.slice(0, 5);
-}, [categories]);
+  const GetFiveCategories = useCallback(() => {
+    return categories.slice(0, 5);
+  }, [categories]);
 
-const fiveCategories = GetFiveCategories();
-
-  
+  const fiveCategories = GetFiveCategories();
 
   return (
     <StoreContext.Provider
@@ -362,6 +389,9 @@ const fiveCategories = GetFiveCategories();
         categories,
         fiveCategories,
         products,
+        totalProducts,
+        productsLoading,
+        fetchProductsPaginated,
         cart,
         analytics,
         cookiesAccepted,
